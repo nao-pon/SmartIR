@@ -14,7 +14,7 @@ from homeassistant.components.climate.const import (
     CURRENT_HVAC_DRY, CURRENT_HVAC_IDLE, CURRENT_HVAC_FAN,
     SUPPORT_SWING_MODE, HVAC_MODES, ATTR_HVAC_MODE)
 from homeassistant.const import (
-    CONF_NAME, STATE_ON, STATE_OFF, STATE_UNKNOWN, ATTR_TEMPERATURE,
+    CONF_NAME, STATE_ON, STATE_OFF, STATE_UNKNOWN, STATE_UNAVAILABLE, ATTR_TEMPERATURE,
     PRECISION_TENTHS, PRECISION_HALVES, PRECISION_WHOLE)
 from homeassistant.core import callback
 from homeassistant.helpers.event import async_track_state_change
@@ -173,7 +173,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
                                      self._async_temp_sensor_changed)
 
             temp_sensor_state = self.hass.states.get(self._temperature_sensor)
-            if temp_sensor_state and temp_sensor_state.state != STATE_UNKNOWN:
+            if temp_sensor_state and temp_sensor_state.state != STATE_UNKNOWN and temp_sensor_state.state != STATE_UNAVAILABLE:
                 self._async_update_temp(temp_sensor_state)
 
         if self._humidity_sensor:
@@ -181,7 +181,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
                                      self._async_humidity_sensor_changed)
 
             humidity_sensor_state = self.hass.states.get(self._humidity_sensor)
-            if humidity_sensor_state and humidity_sensor_state.state != STATE_UNKNOWN:
+            if humidity_sensor_state and humidity_sensor_state.state != STATE_UNKNOWN and humidity_sensor_state.state != STATE_UNAVAILABLE:
                 self._async_update_humidity(humidity_sensor_state)
 
         if self._power_sensor:
@@ -440,7 +440,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
     def _async_update_temp(self, state):
         """Update thermostat with latest state from temperature sensor."""
         try:
-            if state.state != STATE_UNKNOWN:
+            if state.state != STATE_UNKNOWN and state.state != STATE_UNAVAILABLE:
                 self._current_temperature = float(state.state)
         except ValueError as ex:
             _LOGGER.error("Unable to update from temperature sensor: %s", ex)
@@ -449,7 +449,7 @@ class SmartIRClimate(ClimateEntity, RestoreEntity):
     def _async_update_humidity(self, state):
         """Update thermostat with latest state from humidity sensor."""
         try:
-            if state.state != STATE_UNKNOWN:
+            if state.state != STATE_UNKNOWN and state.state != STATE_UNAVAILABLE:
                 self._current_humidity = float(state.state)
         except ValueError as ex:
             _LOGGER.error("Unable to update from humidity sensor: %s", ex)
